@@ -22,7 +22,7 @@
     <!-- Test executor. -->
     <PackageReference Include="Chickensoft.GoDotTest" Version="1.5.10" />
     <!-- Assertions library. -->
-    <PackageReference Include="Shouldly" Version="4.2.1" />
+    <PackageReference Include="Shouldly" Version="4.3.0" />
     <!-- Generated mocks. -->
     <PackageReference Include="LightMock.Generator" Version="1.2.2" />
     <!-- Convenience wrapper around generated mocks. -->
