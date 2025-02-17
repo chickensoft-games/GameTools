@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chickensoft.GameTools", "Ch
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chickensoft.GameTools.Tests", "Chickensoft.GameTools.Tests\Chickensoft.GameTools.Tests.csproj", "{12E70A0C-06CE-4A2C-9621-DDCA9D36374C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chickensoft.GameTools.Demo", "Chickensoft.GameTools.Demo\Chickensoft.GameTools.Demo.csproj", "{51F51F21-5FDE-4DF2-82AA-7705AFECE5AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{12E70A0C-06CE-4A2C-9621-DDCA9D36374C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{12E70A0C-06CE-4A2C-9621-DDCA9D36374C}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{12E70A0C-06CE-4A2C-9621-DDCA9D36374C}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{51F51F21-5FDE-4DF2-82AA-7705AFECE5AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51F51F21-5FDE-4DF2-82AA-7705AFECE5AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51F51F21-5FDE-4DF2-82AA-7705AFECE5AE}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{51F51F21-5FDE-4DF2-82AA-7705AFECE5AE}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal

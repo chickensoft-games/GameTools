@@ -6,6 +6,16 @@
     // the following to your .zshrc, .bashrc, or .bash_profile file:
     // export GODOT="/Applications/Godot.app/Contents/MacOS/Godot"
     {
+      "name": "▶️ Debug Demo",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${env:GODOT}",
+      "args": [],
+      "cwd": "${workspaceFolder}/Chickensoft.GameTools.Demo",
+      "stopAtEntry": false,
+    },
+    {
       "name": "🧪 Debug Tests",
       "type": "coreclr",
       "request": "launch",
