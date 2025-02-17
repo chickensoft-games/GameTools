@@ -1,11 +1,14 @@
 namespace Chickensoft.GameTools.Tests.Environment;
 
-using Chickensoft.GoDotTest;
+using Chickensoft.GameTools.Displays;
 using Chickensoft.GameTools.Environment;
+using Chickensoft.GoDotTest;
 using Godot;
 using Shouldly;
 
 public class DisplayTest(Node testScene) : TestClass(testScene) {
+  public Vector2I ThemeResolution { get; } = new(3840, 2160);
+
   [Cleanup]
   public void Cleanup() {
     Features.Reset();
@@ -17,7 +20,7 @@ public class DisplayTest(Node testScene) : TestClass(testScene) {
     // This actually computes the current screen's scale factor.
     var window = TestScene.GetWindow();
 
-    var scaleInfo = window.GetWindowDpiScaleInfo(3);
+    var scaleInfo = window.GetWindowScaleInfo(ThemeResolution, false);
 
     GD.Print($"System scale: {scaleInfo.SystemScale}");
 
@@ -31,10 +34,10 @@ public class DisplayTest(Node testScene) : TestClass(testScene) {
     Features.FakeOperatingSystem(OSFamily.macOS);
     Display.GetDisplayScaleFactor = window => 2f;
 
-    var scaleInfo = window.GetWindowDpiScaleInfo(3, new Vector2I(800, 600));
+    var scaleInfo = window.GetWindowScaleInfo(ThemeResolution);
 
     scaleInfo.SystemScale.ShouldBeGreaterThan(0f);
-    scaleInfo.WindowSize.ShouldBe(new Vector2I(1600, 1200));
+    scaleInfo.WindowSize.ShouldBe(new Vector2I(1804, 1015));
   }
 
   [Test]

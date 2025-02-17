@@ -46,6 +46,6 @@
     </PackageReference>
     <PackageReference Include="SauceControl.InheritDoc" Version="2.0.2" PrivateAssets="all" />
     <PackageReference Include="GodotSharp" Version="4.3.0" />
-    <PackageReference Include="Chickensoft.Platform" Version="0.6.0-godot4.4.0-dev.7" />
+    <PackageReference Include="Chickensoft.Platform" Version="1.0.0-godot4.4.0-dev.7" />
   </ItemGroup>
 </Project>
