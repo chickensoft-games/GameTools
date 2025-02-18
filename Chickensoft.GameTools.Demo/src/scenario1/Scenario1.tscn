@@ -1,0 +1,59 @@
+[gd_scene load_steps=3 format=3 uid="uid://cywpu6lxdjhuu"]
+
+[ext_resource type="Script" uid="uid://cp44ho44l80kw" path="res://src/scenario1/Scenario1.cs" id="1_17mmo"]
+[ext_resource type="Texture2D" uid="uid://cbxd6hwrojqd1" path="res://src/4k.jpg" id="2_kqvf5"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_17mmo")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="CenterContainer"]
+layout_mode = 2
+texture = ExtResource("2_kqvf5")
+
+[node name="Container" type="MarginContainer" parent="CenterContainer"]
+layout_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="CenterContainer/Container"]
+layout_mode = 2
+color = Color(0, 0, 0, 0.486275)
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/Container"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/Container/MarginContainer"]
+layout_mode = 2
+
+[node name="ToggleButton" type="Button" parent="CenterContainer/Container/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Toggle Fullscreen"
+
+[node name="MainMenuButton" type="Button" parent="CenterContainer/Container/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Main Menu"
+
+[node name="Label" type="Label" parent="CenterContainer/Container/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Press alt + enter to toggle fullscreen"
+
+[connection signal="pressed" from="CenterContainer/Container/MarginContainer/VBoxContainer/ToggleButton" to="." method="OnTestButtonPressed"]
+[connection signal="pressed" from="CenterContainer/Container/MarginContainer/VBoxContainer/MainMenuButton" to="." method="OnTestButtonPressed"]

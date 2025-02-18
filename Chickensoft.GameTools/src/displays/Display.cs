@@ -40,6 +40,15 @@ public static class Display {
   /// </summary>
   public static Vector2I UHD8k => new(7680, 4320);
 
+  /// <summary>
+  /// Maximum windowed size as a fraction of a screen dimension.
+  /// </summary>
+  public const float MAX_WINDOWED_SIZE = 0.75f;
+  /// <summary>
+  /// Minimum windowed size as a fraction of a screen dimension.
+  /// </summary>
+  public const float MIN_WINDOWED_SIZE = 0.25f;
+
   internal delegate float ScreenGetScaleDelegate(int screen);
   internal delegate Vector2I ScreenGetSizeDelegate(int screen);
   internal delegate int ScreenGetDpiDelegate(int screen);
@@ -110,64 +119,177 @@ public static class Display {
     Describe((long)screen);
 
   /// <summary>
-  /// Make the game window look good, regardless of the user's display settings.
+  /// Make a window "look good" by accounting for the scale of the display that
+  /// the window is on, guessing good window size constraints, centering the
+  /// window, and enabling the selected scaling behavior (fixed UI size or
+  /// proportional UI size).
   /// </summary>
   /// <param name="window">Godot window.</param>
-  /// <param name="themeResolution">Theme design resolution.</param>
-  /// <param name="info">Window scaling info. Omit if you'd like this to
-  /// method to determine it for you (default).</param>
-  /// <returns>Window scale info.</returns>
-  public static WindowScaleInfo LookGood(
+  /// <param name="scaleBehavior">High-level scaling strategy to apply.</param>
+  /// <param name="themeResolution">The design resolution of your theme.
+  /// You typically want a fairly high resolution for your theme that can be
+  /// downscaled on most monitors (4K is usually plenty).</param>
+  /// <param name="scaleInfo">Window scale info. If null, will be automatically
+  /// determined on macOS and Windows via native platform methods (default).
+  /// Generally, you would not supply this unless you are doing something
+  /// highly custom.
+  /// </param>
+  /// <param name="sizeInfo">Window size info. If null, will be automatically
+  /// computed by guessing the best size and size range for the window.
+  /// </param>
+  /// <param name="useProjectAspectRatio">Whether or not the aspect ratio
+  /// of the window size set in the project settings should be used when
+  /// selecting a window size. Default is true. Set to false if your game
+  /// does not require a fixed aspect ratio.</param>
+  /// <param name="isFullscreen">Whether or not the window should be fullscreen.
+  /// You can pass in true/false to toggle fullscreen mode as needed.</param>
+  /// <param name="useExclusiveFullscreen">True to use exclusive fullscreen
+  /// (more performant). Default is true.</param>
+  /// <param name="minWindowedSize">The minimum windowed size as a ratio of the
+  /// minimum screen dimension between 0 and 1. The default is
+  /// <see cref="MIN_WINDOWED_SIZE"/>.</param>
+  /// <param name="maxWindowedSize">The maximum windowed size as a ratio of the
+  /// maximum screen dimension between 0 and 1. The default is
+  /// <see cref="MAX_WINDOWED_SIZE"/>.</param>
+  /// <returns>Window scale and sizing information.</returns>
+  public static WindowInfo LookGood(
     this Window window,
+    WindowScaleBehavior scaleBehavior,
     Vector2I themeResolution,
-    WindowScaleInfo? info = null
+    WindowScaleInfo? scaleInfo = null,
+    WindowSizeInfo? sizeInfo = null,
+    bool useProjectAspectRatio = true,
+    bool isFullscreen = false,
+    bool useExclusiveFullscreen = true,
+    float minWindowedSize = MIN_WINDOWED_SIZE,
+    float maxWindowedSize = MAX_WINDOWED_SIZE
   ) {
-    info ??= window.GetWindowScaleInfo(themeResolution, isFullscreen: false);
-    window.ApplyScaling(info, true);
+    var screen = window.CurrentScreen;
 
-    return info;
+    scaleInfo ??= window.GetWindowScaleInfo(themeResolution, isFullscreen);
+    sizeInfo ??= GetWindowSize(
+      scaleInfo.Resolution,
+      useProjectAspectRatio,
+      minWindowedSize,
+      maxWindowedSize
+    );
+
+    var fs = useExclusiveFullscreen
+      ? Window.ModeEnum.ExclusiveFullscreen
+      : Window.ModeEnum.Fullscreen;
+
+    var targetMode = isFullscreen ? fs : Window.ModeEnum.Windowed;
+
+    switch (scaleBehavior) {
+      case WindowScaleBehavior.UIFixed:
+        window.ContentScaleMode = Window.ContentScaleModeEnum.Disabled;
+        window.ContentScaleAspect = Window.ContentScaleAspectEnum.Expand;
+
+        break;
+
+      default:
+      case WindowScaleBehavior.UIProportional:
+        if (isFullscreen) {
+          window.ContentScaleMode = Window.ContentScaleModeEnum.Disabled;
+          window.ContentScaleAspect = Window.ContentScaleAspectEnum.Expand;
+        }
+        else {
+          window.ContentScaleSize = scaleInfo.Resolution;
+          window.ContentScaleMode = Window.ContentScaleModeEnum.CanvasItems;
+          window.ContentScaleAspect = Window.ContentScaleAspectEnum.Expand;
+        }
+
+        break;
+    }
+
+    window.ContentScaleFactor = scaleInfo.ContentScaleFactor;
+    window.Size = sizeInfo.Size;
+    window.MinSize = sizeInfo.MinSize;
+    window.MaxSize = sizeInfo.MaxSize;
+    window.CurrentScreen = screen;
+
+    window.Position = (scaleInfo.Resolution - window.Size) / 2;
+
+    window.Mode = targetMode;
+
+    // Required since the window sometimes ends up on another screen, possibly
+    // due to virtual window coordinates.
+    window.CurrentScreen = screen;
+
+    return new(scaleBehavior, scaleInfo, sizeInfo);
   }
 
   /// <summary>
-  /// Make the game window look good fullscreen, regardless of the user's
-  /// display settings.
+  /// Get the window size and minimum and maximum size constraints based on the
+  /// project window size and actual screen size.
   /// </summary>
-  /// <param name="window">Godot window.</param>
-  /// <param name="themeResolution">Theme design resolution.</param>
-  /// <param name="useExclusiveFullScreen">True if the game should use
-  /// exclusive fullscreen. Exclusive fullscreen is generally
-  /// more performant. Default is true.</param>
-  /// <param name="info">Window scaling info. Omit if you'd like this to
-  /// method to determine it for you (default).</param>
-  /// <returns>Window scale info.</returns>
-  public static WindowScaleInfo LookGoodFullscreen(
-    this Window window,
-    Vector2I themeResolution,
-    bool useExclusiveFullScreen = true,
-    WindowScaleInfo? info = null
+  /// <param name="screenSize">Godot's understanding of the screen size.</param>
+  /// <param name="useProjectAspectRatio">True to use the aspect ratio defined
+  /// by the project window size setting.</param>
+  /// <param name="minWindowedSize">The minimum windowed size as a ratio of the
+  /// minimum screen dimension between 0 and 1. The default is
+  /// <see cref="MIN_WINDOWED_SIZE"/>.</param>
+  /// <param name="maxWindowedSize">The maximum windowed size as a ratio of the
+  /// maximum screen dimension between 0 and 1. The default is
+  /// <see cref="MAX_WINDOWED_SIZE"/>.</param>
+  /// <returns></returns>
+  public static WindowSizeInfo GetWindowSize(
+    Vector2I screenSize,
+    bool useProjectAspectRatio = true,
+    float minWindowedSize = MIN_WINDOWED_SIZE,
+    float maxWindowedSize = MAX_WINDOWED_SIZE
   ) {
-    info ??= window.GetWindowScaleInfo(themeResolution, isFullscreen: true);
-    window.ApplyScaling(info, true);
+    Vector2 screen = screenSize;
+    // Figure out the minimum and maximum area of the screen we can use.
+    var minSize = (Vector2I)(screen * minWindowedSize).Round();
+    var maxSize = (Vector2I)(screen * maxWindowedSize).Round();
 
-    var windowId = window.GetWindowId();
-    var mode = DisplayServer.WindowGetMode(windowId);
+    var windowSize = maxSize;
+    var windowMinSize = minSize;
+    var windowMaxSize = maxSize;
 
-    if (
-      mode is
-        DisplayServer.WindowMode.Fullscreen or
-        DisplayServer.WindowMode.ExclusiveFullscreen
-    ) {
-      return info;
+    if (useProjectAspectRatio) {
+      // Clamp screen down to the largest size that shares the same aspect
+      // ratio as the project window size.
+      var aspect = ProjectWindowSize.Aspect();
+      windowSize = windowSize.Constrain(aspect, minSize, maxSize);
+      windowMinSize = windowMinSize.Constrain(aspect, minSize, maxSize);
+      windowMaxSize = windowMaxSize.Constrain(aspect, minSize, maxSize);
     }
 
-    DisplayServer.WindowSetMode(
-      useExclusiveFullScreen
-        ? DisplayServer.WindowMode.ExclusiveFullscreen
-        : DisplayServer.WindowMode.Fullscreen,
-      windowId
-    );
+    return new(windowSize, windowMinSize, windowMaxSize);
+  }
 
-    return info;
+  /// <summary>
+  /// Constrain a size to a given aspect ratio while keeping it inside the
+  /// arbitrary min and max sizes (which may have different aspect ratios).
+  /// </summary>
+  /// <param name="size">Vector to constrain.</param>
+  /// <param name="aspect">Aspect ratio to use.</param>
+  /// <param name="minSize">Min size.</param>
+  /// <param name="maxSize">Max size.</param>
+  /// <returns></returns>
+  public static Vector2I Constrain(
+      this Vector2I size, float aspect, Vector2I minSize, Vector2I maxSize
+  ) {
+    // First pass: try to match width
+    var width = Mathf.Clamp(size.X, minSize.X, maxSize.X);
+    var height = (int)(width / aspect);
+
+    // If that height is out of range, clamp it and recompute width
+    if (height < minSize.Y) {
+      height = minSize.Y;
+      width = (int)(height * aspect);
+    }
+    else if (height > maxSize.Y) {
+      height = maxSize.Y;
+      width = (int)(height * aspect);
+    }
+
+    // Clamp and resize again to try and avoid overflow in the other dimension.
+    width = Mathf.Clamp(width, minSize.X, maxSize.X);
+
+    return new(width, (int)(width / aspect));
   }
 
   /// <summary>
@@ -178,7 +300,7 @@ public static class Display {
   /// <param name="themeResolution">Theme asset design resolution.</param>
   /// <param name="isFullscreen">True if the game is intended to be
   /// full screen.</param>
-  /// <returns></returns>
+  /// <returns>Window scale information.</returns>
   public static WindowScaleInfo GetWindowScaleInfo(
     this Window window, Vector2I themeResolution, bool isFullscreen = false
   ) {
@@ -204,13 +326,12 @@ public static class Display {
     var systemScale = systemDpi / 96.0f;
     // Get the size of the window from Godot, which is going to be in the
     // system scale factor coordinate space.
-    var godotRes = DisplayServer.ScreenGetSize(window.CurrentScreen);
+    var godotResolution = DisplayServer.ScreenGetSize(window.CurrentScreen);
     var godotScale = ScreenGetScale(screen);
-    var windowSize = window.Size;
     // We need a ratio to correct from system scale to actual monitor scale
     var correctionFactor = 1f / (
       Features.OperatingSystem == OSFamily.macOS
-        ? (float)nativeResolution.Y / godotRes.Y // macos
+        ? (float)nativeResolution.Y / godotResolution.Y // macos
         : displayScale / systemScale             // windows & linux
     );
 
@@ -238,14 +359,40 @@ public static class Display {
     // independent of the scale factor by multiplying by the correctionFactor
     // and windowScale. Project window size should always be specified in terms
     // of the theme design size.
-    var newWindowSize = new Vector2I(
+    var windowSize = new Vector2I(
       (int)(ProjectWindowSize.X * correctionFactor * windowScale),
       (int)(ProjectWindowSize.Y * correctionFactor * windowScale)
     );
 
+    var maxWindowedSize = new Vector2I(
+      (int)(godotResolution.X * MAX_WINDOWED_SIZE),
+      (int)(godotResolution.Y * MAX_WINDOWED_SIZE)
+    );
+
+    var adjustedWindowSize = windowSize;
+
+    // Windows which would take up too much screen space are shrunk.
+    if (windowSize.X >= maxWindowedSize.X) {
+      adjustedWindowSize.X = maxWindowedSize.X;
+    }
+
+    if (windowSize.Y >= maxWindowedSize.Y) {
+      adjustedWindowSize.Y = maxWindowedSize.Y;
+    }
+
+    var windowDiff = windowSize - adjustedWindowSize;
+
+    var windowAdjustment = new Vector2(
+      adjustedWindowSize.X / (float)windowSize.X,
+      adjustedWindowSize.Y / (float)windowSize.Y
+    );
+
+    windowSize = adjustedWindowSize;
+
     return new WindowScaleInfo(
+      Screen: screen,
       SystemScale: systemScale,
-      RetinaScale: windowScale,
+      WindowScale: windowScale,
       DisplayScale: displayScale,
       ThemeScale: themeScale,
       ContentScaleFactor: contentScaleFactor,
@@ -253,7 +400,9 @@ public static class Display {
       ProjectViewportSize: ProjectViewportSize,
       ProjectWindowSize: ProjectWindowSize,
       NativeResolution: nativeResolution,
-      WindowSize: newWindowSize
+      Resolution: godotResolution,
+      WindowSize: windowSize,
+      WindowAdjustment: windowAdjustment
     );
   }
 
@@ -309,22 +458,5 @@ public static class Display {
     }
 
     return 1f;
-  }
-
-  private static void ApplyScaling(
-    this Window window, WindowScaleInfo info, bool shouldCenter
-  ) {
-    var screen = window.CurrentScreen;
-    window.ContentScaleFactor = info.ContentScaleFactor;
-    window.Size = info.WindowSize;
-    window.CurrentScreen = screen;
-
-    if (shouldCenter) {
-      window.Position = (ScreenGetSize(screen) - info.WindowSize) / 2;
-    }
-
-    // Required since the window sometimes ends up on another screen, possibly
-    // due to virtual window coordinates.
-    window.CurrentScreen = screen;
   }
 }
