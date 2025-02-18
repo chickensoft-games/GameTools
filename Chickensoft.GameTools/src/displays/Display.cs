@@ -27,6 +27,7 @@ public static class Display {
   /// <summary>
   /// 3840x2160 resolution, or "Ultra HD". Also commonly known as 4K. See
   /// https://en.wikipedia.org/wiki/2160p
+  /// </summary>
   public static Vector2I UHD4k => new(3840, 2160);
   /// <summary>
   /// 5120x2880 resolution, or "Ultra HD 5K". This is the resolution of Apple's
@@ -108,6 +109,14 @@ public static class Display {
   public static string Describe(int screen) =>
     Describe((long)screen);
 
+  /// <summary>
+  /// Make the game window look good, regardless of the user's display settings.
+  /// </summary>
+  /// <param name="window">Godot window.</param>
+  /// <param name="themeResolution">Theme design resolution.</param>
+  /// <param name="info">Window scaling info. Omit if you'd like this to
+  /// method to determine it for you (default).</param>
+  /// <returns>Window scale info.</returns>
   public static WindowScaleInfo LookGood(
     this Window window,
     Vector2I themeResolution,
@@ -119,13 +128,44 @@ public static class Display {
     return info;
   }
 
+  /// <summary>
+  /// Make the game window look good fullscreen, regardless of the user's
+  /// display settings.
+  /// </summary>
+  /// <param name="window">Godot window.</param>
+  /// <param name="themeResolution">Theme design resolution.</param>
+  /// <param name="useExclusiveFullScreen">True if the game should use
+  /// exclusive fullscreen. Exclusive fullscreen is generally
+  /// more performant. Default is true.</param>
+  /// <param name="info">Window scaling info. Omit if you'd like this to
+  /// method to determine it for you (default).</param>
+  /// <returns>Window scale info.</returns>
   public static WindowScaleInfo LookGoodFullscreen(
     this Window window,
     Vector2I themeResolution,
+    bool useExclusiveFullScreen = true,
     WindowScaleInfo? info = null
   ) {
     info ??= window.GetWindowScaleInfo(themeResolution, isFullscreen: true);
     window.ApplyScaling(info, true);
+
+    var windowId = window.GetWindowId();
+    var mode = DisplayServer.WindowGetMode(windowId);
+
+    if (
+      mode is
+        DisplayServer.WindowMode.Fullscreen or
+        DisplayServer.WindowMode.ExclusiveFullscreen
+    ) {
+      return info;
+    }
+
+    DisplayServer.WindowSetMode(
+      useExclusiveFullScreen
+        ? DisplayServer.WindowMode.ExclusiveFullscreen
+        : DisplayServer.WindowMode.Fullscreen,
+      windowId
+    );
 
     return info;
   }
@@ -271,7 +311,9 @@ public static class Display {
     return 1f;
   }
 
-  public static void ApplyScaling(this Window window, WindowScaleInfo info, bool shouldCenter) {
+  private static void ApplyScaling(
+    this Window window, WindowScaleInfo info, bool shouldCenter
+  ) {
     var screen = window.CurrentScreen;
     window.ContentScaleFactor = info.ContentScaleFactor;
     window.Size = info.WindowSize;
@@ -280,7 +322,9 @@ public static class Display {
     if (shouldCenter) {
       window.Position = (ScreenGetSize(screen) - info.WindowSize) / 2;
     }
-    // Required since on macOS the window sometimes ends up on another screen?
+
+    // Required since the window sometimes ends up on another screen, possibly
+    // due to virtual window coordinates.
     window.CurrentScreen = screen;
   }
 }
