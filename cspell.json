@@ -14,9 +14,9 @@
     "**/*.uid"
   ],
   "words": [
-    "downscaling",
     "assemblyfilters",
     "automerge",
+    "backbuffer",
     "branchcoverage",
     "brandedoutcast",
     "buildtransitive",
@@ -27,6 +27,7 @@
     "contentfiles",
     "CYGWIN",
     "devbuild",
+    "downscaling",
     "endregion",
     "Finalizer",
     "Finalizers",

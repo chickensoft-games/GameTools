@@ -176,9 +176,13 @@ public static class Display {
 
     var themeScale = (float)nativeResolution.Y / themeResolution.Y;
 
-    var retinaScale = Features.OperatingSystem == OSFamily.macOS
+    // This is the retina multiplier on macOS since the macos logical
+    // backbuffer coordinate space is multiplied by this factor.
+    //
+    // On windows, this is simply the theme's scale factor.
+    var windowScale = Features.OperatingSystem == OSFamily.macOS
       ? godotScale
-      : 1.0f;
+      : themeScale;
 
     // This content scale factor accounts for the actual monitor scaling and
     // godot's scaling so that the UI takes up roughly the same amount of
@@ -190,15 +194,20 @@ public static class Display {
     // scale, but this at least gives them a common frame of reference.
     var contentScaleFactor = themeScale * correctionFactor;
 
+    // Window frame positions can be translated from theme design coordinates
+    // independent of the scale factor by multiplying by the correctionFactor
+    // and windowScale. Project window size should always be specified in terms
+    // of the theme design size.
     var newWindowSize = new Vector2I(
-      (int)(windowSize.X * correctionFactor * retinaScale),
-      (int)(windowSize.Y * correctionFactor * retinaScale)
+      (int)(ProjectWindowSize.X * correctionFactor * windowScale),
+      (int)(ProjectWindowSize.Y * correctionFactor * windowScale)
     );
 
     return new WindowScaleInfo(
       SystemScale: systemScale,
-      RetinaScale: retinaScale,
+      RetinaScale: windowScale,
       DisplayScale: displayScale,
+      ThemeScale: themeScale,
       ContentScaleFactor: contentScaleFactor,
       CorrectionFactor: correctionFactor,
       ProjectViewportSize: ProjectViewportSize,

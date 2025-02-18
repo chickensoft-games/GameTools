@@ -12,12 +12,15 @@ using Godot;
 /// multi-monitor, mixed-DPI scenarios. In general, prefer
 /// <see cref="DisplayScale"/> if you want to take into account the user's
 /// desired display scaling.</param>
-/// <param name="RetinaScale">The retina scale factor for macOS (2 or 3).
-/// On other platforms, this is just 1.0.</param>
+/// <param name="RetinaScale">A scale factor used in combination with
+/// <see cref="CorrectionFactor" /> to determine window size independently
+/// of the scale factor.</param>
 /// <param name="DisplayScale">The actual display scale for macOS and Windows,
 /// as reported by CoreGraphics on macOS and Win32 API's on Windows. Requires
 /// Windows 10+ as we need newer Win32 API's that work around the fact that
 /// Godot does not support per-monitor DPI awareness.</param>
+/// <param name="ThemeScale">The native resolution height divided by the
+/// theme's design resolution height.</param>
 /// <param name="ContentScaleFactor">The new content scale factor
 /// needed to scale the theme correctly based on the native resolution of the
 /// display. Applying this scale factor will result in your application
@@ -39,6 +42,7 @@ public record WindowScaleInfo(
   float SystemScale,
   float RetinaScale,
   float DisplayScale,
+  float ThemeScale,
   float ContentScaleFactor,
   float CorrectionFactor,
   Vector2I ProjectViewportSize,
@@ -51,7 +55,9 @@ public record WindowScaleInfo(
   /// </summary>
   public override string ToString() => $"""
   SystemScale: {SystemScale}
+  RetinaScale: {RetinaScale}
   DisplayScale: {DisplayScale}
+  ThemeScale: {ThemeScale}
   ContentScaleFactor: {ContentScaleFactor}
   CorrectionFactor: {CorrectionFactor}
   ProjectViewportSize: {ProjectViewportSize}
