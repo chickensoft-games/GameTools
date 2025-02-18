@@ -8,6 +8,37 @@ using Godot;
 /// A collection of methods for working with displays and high DPI scaling.
 /// </summary>
 public static class Display {
+  /// <summary>
+  /// 1280x720 resolution — The original "HD" resolution, but not what people
+  /// usually think of as HD these days. See
+  /// https://en.wikipedia.org/wiki/720p
+  /// </summary>
+  public static Vector2I HD => new(1280, 720);
+  /// <summary>
+  /// 1920x1080 resolution, or "Full HD". This is the "HD" you're probably
+  /// thinking of. See https://en.wikipedia.org/wiki/1080p
+  /// </summary>
+  public static Vector2I FullHD => new(1920, 1080);
+  /// <summary>
+  /// 2560x1440 resolution, or "Quad HD" since it is 4 x 720p See
+  /// https://en.wikipedia.org/wiki/1440p
+  /// </summary>
+  public static Vector2I QHD => new(2560, 1440);
+  /// <summary>
+  /// 3840x2160 resolution, or "Ultra HD". Also commonly known as 4K. See
+  /// https://en.wikipedia.org/wiki/2160p
+  public static Vector2I UHD4k => new(3840, 2160);
+  /// <summary>
+  /// 5120x2880 resolution, or "Ultra HD 5K". This is the resolution of Apple's
+  /// Retina 5K display. See https://en.wikipedia.org/wiki/5K_resolution
+  /// </summary>
+  public static Vector2I UHD5k => new(5120, 2880);
+  /// <summary>
+  /// 7680x4320 resolution, or "Ultra HD 8K". See
+  /// https://en.wikipedia.org/wiki/8K_resolution
+  /// </summary>
+  public static Vector2I UHD8k => new(7680, 4320);
+
   internal delegate float ScreenGetScaleDelegate(int screen);
   internal delegate Vector2I ScreenGetSizeDelegate(int screen);
   internal delegate int ScreenGetDpiDelegate(int screen);
@@ -83,7 +114,7 @@ public static class Display {
     WindowScaleInfo? info = null
   ) {
     info ??= window.GetWindowScaleInfo(themeResolution, isFullscreen: false);
-    ApplyScaling(window, info);
+    window.ApplyScaling(info, true);
 
     return info;
   }
@@ -94,7 +125,7 @@ public static class Display {
     WindowScaleInfo? info = null
   ) {
     info ??= window.GetWindowScaleInfo(themeResolution, isFullscreen: true);
-    ApplyScaling(window, info);
+    window.ApplyScaling(info, true);
 
     return info;
   }
@@ -134,13 +165,20 @@ public static class Display {
     // Get the size of the window from Godot, which is going to be in the
     // system scale factor coordinate space.
     var godotRes = DisplayServer.ScreenGetSize(window.CurrentScreen);
+    var godotScale = ScreenGetScale(screen);
     var windowSize = window.Size;
     // We need a ratio to correct from system scale to actual monitor scale
-    var correctionFactor = Features.OperatingSystem == OSFamily.macOS
-      ? (float)nativeResolution.Y / godotRes.Y // macos
-      : displayScale / systemScale; // windows & linux
+    var correctionFactor = 1f / (
+      Features.OperatingSystem == OSFamily.macOS
+        ? (float)nativeResolution.Y / godotRes.Y // macos
+        : displayScale / systemScale             // windows & linux
+    );
 
     var themeScale = (float)nativeResolution.Y / themeResolution.Y;
+
+    var retinaScale = Features.OperatingSystem == OSFamily.macOS
+      ? godotScale
+      : 1.0f;
 
     // This content scale factor accounts for the actual monitor scaling and
     // godot's scaling so that the UI takes up roughly the same amount of
@@ -150,25 +188,23 @@ public static class Display {
     // monitor's actual resolution. Users can offer scaling options in their
     // game and multiply this factor by the scaling option to get the final
     // scale, but this at least gives them a common frame of reference.
-    var contentScaleFactor = themeScale / correctionFactor;
+    var contentScaleFactor = themeScale * correctionFactor;
 
     var newWindowSize = new Vector2I(
-      (int)(windowSize.X / correctionFactor),
-      (int)(windowSize.Y / correctionFactor)
+      (int)(windowSize.X * correctionFactor * retinaScale),
+      (int)(windowSize.Y * correctionFactor * retinaScale)
     );
-
-    var newWindowPosition = (godotRes - newWindowSize) / 2;
 
     return new WindowScaleInfo(
       SystemScale: systemScale,
+      RetinaScale: retinaScale,
       DisplayScale: displayScale,
       ContentScaleFactor: contentScaleFactor,
       CorrectionFactor: correctionFactor,
       ProjectViewportSize: ProjectViewportSize,
       ProjectWindowSize: ProjectWindowSize,
       NativeResolution: nativeResolution,
-      WindowSize: newWindowSize,
-      WindowPosition: newWindowPosition
+      WindowSize: newWindowSize
     );
   }
 
@@ -226,9 +262,16 @@ public static class Display {
     return 1f;
   }
 
-  private static void ApplyScaling(Window window, WindowScaleInfo info) {
+  public static void ApplyScaling(this Window window, WindowScaleInfo info, bool shouldCenter) {
+    var screen = window.CurrentScreen;
     window.ContentScaleFactor = info.ContentScaleFactor;
     window.Size = info.WindowSize;
-    window.Position = info.WindowPosition;
+    window.CurrentScreen = screen;
+
+    if (shouldCenter) {
+      window.Position = (ScreenGetSize(screen) - info.WindowSize) / 2;
+    }
+    // Required since on macOS the window sometimes ends up on another screen?
+    window.CurrentScreen = screen;
   }
 }
