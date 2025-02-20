@@ -32,10 +32,12 @@ public partial class Scenario2 : Control {
   public void SetFullscreen(bool isFullscreen) {
     _isFullscreen = isFullscreen;
 
-    GetWindow().LookGood(
+    var info = GetWindow().LookGood(
       WindowScaleBehavior.UIFixed,
       BaseResolution,
       isFullscreen: _isFullscreen
     );
+
+    GD.Print(info);
   }
 }

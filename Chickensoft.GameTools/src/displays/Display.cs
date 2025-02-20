@@ -210,11 +210,12 @@ public static class Display {
 
     window.Position = (scaleInfo.Resolution - window.Size) / 2;
 
-    window.Mode = targetMode;
-
     // Required since the window sometimes ends up on another screen, possibly
     // due to virtual window coordinates.
     window.CurrentScreen = screen;
+
+    window.Mode = targetMode;
+
 
     return new(scaleBehavior, scaleInfo, sizeInfo);
   }
