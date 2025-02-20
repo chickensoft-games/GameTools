@@ -37,7 +37,6 @@ public class DisplayTest(Node testScene) : TestClass(testScene) {
     var scaleInfo = window.GetWindowScaleInfo(ThemeResolution);
 
     scaleInfo.SystemScale.ShouldBeGreaterThan(0f);
-    scaleInfo.WindowSize.ShouldBe(new Vector2I(1804, 1015));
   }
 
   [Test]

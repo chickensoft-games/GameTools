@@ -167,7 +167,7 @@ public static class Display {
     var screen = window.CurrentScreen;
 
     scaleInfo ??= window.GetWindowScaleInfo(themeResolution, isFullscreen);
-    sizeInfo ??= GetWindowSize(
+    sizeInfo ??= GetWindowSizeInfo(
       scaleInfo.Resolution,
       useProjectAspectRatio,
       minWindowedSize,
@@ -234,7 +234,7 @@ public static class Display {
   /// maximum screen dimension between 0 and 1. The default is
   /// <see cref="MAX_WINDOWED_SIZE"/>.</param>
   /// <returns></returns>
-  public static WindowSizeInfo GetWindowSize(
+  public static WindowSizeInfo GetWindowSizeInfo(
     Vector2I screenSize,
     bool useProjectAspectRatio = true,
     float minWindowedSize = MIN_WINDOWED_SIZE,
@@ -356,39 +356,6 @@ public static class Display {
     // scale, but this at least gives them a common frame of reference.
     var contentScaleFactor = themeScale * correctionFactor;
 
-    // Window frame positions can be translated from theme design coordinates
-    // independent of the scale factor by multiplying by the correctionFactor
-    // and windowScale. Project window size should always be specified in terms
-    // of the theme design size.
-    var windowSize = new Vector2I(
-      (int)(ProjectWindowSize.X * correctionFactor * windowScale),
-      (int)(ProjectWindowSize.Y * correctionFactor * windowScale)
-    );
-
-    var maxWindowedSize = new Vector2I(
-      (int)(godotResolution.X * MAX_WINDOWED_SIZE),
-      (int)(godotResolution.Y * MAX_WINDOWED_SIZE)
-    );
-
-    var adjustedWindowSize = windowSize;
-
-    // Windows which would take up too much screen space are shrunk.
-    if (windowSize.X >= maxWindowedSize.X) {
-      adjustedWindowSize.X = maxWindowedSize.X;
-    }
-
-    if (windowSize.Y >= maxWindowedSize.Y) {
-      adjustedWindowSize.Y = maxWindowedSize.Y;
-    }
-
-    var windowDiff = windowSize - adjustedWindowSize;
-
-    var windowAdjustment = new Vector2(
-      adjustedWindowSize.X / (float)windowSize.X,
-      adjustedWindowSize.Y / (float)windowSize.Y
-    );
-
-    windowSize = adjustedWindowSize;
 
     return new WindowScaleInfo(
       Screen: screen,
@@ -401,9 +368,7 @@ public static class Display {
       ProjectViewportSize: ProjectViewportSize,
       ProjectWindowSize: ProjectWindowSize,
       NativeResolution: nativeResolution,
-      Resolution: godotResolution,
-      WindowSize: windowSize,
-      WindowAdjustment: windowAdjustment
+      Resolution: godotResolution
     );
   }
 

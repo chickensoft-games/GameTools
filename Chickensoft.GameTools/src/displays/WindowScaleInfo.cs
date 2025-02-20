@@ -45,11 +45,6 @@ using Godot;
 /// Godot project. Provided for convenience.</param>
 /// <param name="ProjectWindowSize">The window size as configured in the
 /// Godot project. Provided for convenience.</param>
-/// <param name="WindowSize">New window size.</param>
-/// <param name="WindowAdjustment">Windows cannot always be set to the desired
-/// size if there is enough room on the screen. This adjustment factor is the
-/// amount of the desired window size that <see cref="WindowSize"/> is set to.
-/// </param>
 public record WindowScaleInfo(
   int Screen,
   float SystemScale,
@@ -61,26 +56,20 @@ public record WindowScaleInfo(
   Vector2I ProjectViewportSize,
   Vector2I ProjectWindowSize,
   Vector2I NativeResolution,
-  Vector2I Resolution,
-  Vector2I WindowSize,
-  Vector2 WindowAdjustment
+  Vector2I Resolution
 ) {
-  /// <summary>
-  /// String representation of the <see cref="WindowScaleInfo"/>.
-  /// </summary>
+  /// <inheritdoc />
   public override string ToString() => $"""
-  Screen: {Screen}
-  SystemScale: {SystemScale}
-  WindowScale: {WindowScale}
-  DisplayScale: {DisplayScale}
-  ThemeScale: {ThemeScale}
-  ContentScaleFactor: {ContentScaleFactor}
-  CorrectionFactor: {CorrectionFactor}
-  ProjectViewportSize: {ProjectViewportSize}
-  ProjectWindowSize: {ProjectWindowSize}
-  NativeResolution: {NativeResolution}
-  Resolution: {Resolution}
-  WindowSize: {WindowSize}
-  WindowAdjustment: {WindowAdjustment}
+  {nameof(Screen)}: {Screen}
+  {nameof(SystemScale)}: {SystemScale}
+  {nameof(WindowScale)}: {WindowScale}
+  {nameof(DisplayScale)}: {DisplayScale}
+  {nameof(ThemeScale)}: {ThemeScale}
+  {nameof(ContentScaleFactor)}: {ContentScaleFactor}
+  {nameof(CorrectionFactor)}: {CorrectionFactor}
+  {nameof(ProjectViewportSize)}: {ProjectViewportSize}
+  {nameof(ProjectWindowSize)}: {ProjectWindowSize}
+  {nameof(NativeResolution)}: {NativeResolution}
+  {nameof(Resolution)}: {Resolution}
   """;
 }

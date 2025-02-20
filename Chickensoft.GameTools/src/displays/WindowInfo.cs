@@ -13,10 +13,10 @@ public record WindowInfo(
   WindowSizeInfo SizeInfo
 ) {
   /// <inheritdoc />
-  public override string ToString() =>
-    $"""
-    ScaleBehavior: {ScaleBehavior}
-    {ScaleInfo}
-    {SizeInfo}
-    """;
+  public override string ToString() => $"""
+  WindowInfo:
+  {nameof(ScaleBehavior)}: {ScaleBehavior}
+  {ScaleInfo}
+  {SizeInfo}
+  """;
 }
