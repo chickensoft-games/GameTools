@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <!-- Test executor. -->
-    <PackageReference Include="Chickensoft.GoDotTest" Version="1.6.1" />
+    <PackageReference Include="Chickensoft.GoDotTest" Version="1.6.2" />
     <!-- Assertions library. -->
     <PackageReference Include="Shouldly" Version="4.3.0" />
     <!-- Generated mocks. -->
