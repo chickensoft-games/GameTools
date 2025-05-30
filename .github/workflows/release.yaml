@@ -28,6 +28,7 @@ jobs:
   release:
     name: '📦 Release'
     runs-on: ubuntu-latest
+    if: github.repository == 'chickensoft-games/GameTools'
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: true
       DOTNET_NOLOGO: true
