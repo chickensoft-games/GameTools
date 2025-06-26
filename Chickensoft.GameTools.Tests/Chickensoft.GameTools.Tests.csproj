@@ -24,7 +24,7 @@
     <!-- Assertions library. -->
     <PackageReference Include="Shouldly" Version="4.3.0" />
     <!-- Generated mocks. -->
-    <PackageReference Include="LightMock.Generator" Version="1.2.2" />
+    <PackageReference Include="LightMock.Generator" Version="1.2.3" />
     <!-- Convenience wrapper around generated mocks. -->
     <PackageReference Include="LightMoq" Version="0.1.0" />
   </ItemGroup>
