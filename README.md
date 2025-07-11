@@ -113,11 +113,11 @@ GameTools can help you manage display scaling on desktop platforms by automatica
 
 Check out the [demo project] which lets you select between both scaling behaviors and toggle fullscreen mode.
 
-## High-Level Scaling Behaviors
+### High-Level Scaling Behaviors
 
 Two high-level scaling behaviors are provided by GameTools. Both work well when windowed or full-screen and automatically correct for the scale factor of the screen that the window is on.
 
-### ✅ Proportional UI Scaling
+#### ✅ Proportional UI Scaling
 
 Scales the UI (and your game) down as the window shrinks. Everything remains the same size relative to each other, enabling you to create games for a specific resolution or highly custom visual style.
 
@@ -131,7 +131,7 @@ var info = GetWindow().LookGood(
 );
 ```
 
-### ✅ Fixed UI Scaling
+#### ✅ Fixed UI Scaling
 
 Leaves the UI at a fixed size. You can easily configure your game to clip behind it or scale to fit the window using a [SubViewport]. For the demo, we've opted to configure the game to scale to fit the window while the UI remains unchanged.
 
@@ -148,7 +148,7 @@ var info = GetWindow().LookGood(
 > [!TIP]
 > For more on display scaling, check out Chickensoft's blog article titled [Display Scaling in Godot 4][display-scaling].
 
-## Manual Scaling
+### Manual Scaling
 
 You can use the information provided by GameTools in your own scaling computations.
 
@@ -169,6 +169,60 @@ public override void _Ready() {
     // sizeInfo has a recommended size for the window and a recommended min and
     // max size for the window. In case you can't be bothered to do all that.
 }
+```
+
+## 🗃️ Collections
+
+## 📉 `SpatialGrid2D`
+
+GameTools includes a 2D spatial grid for Godot that allows you to store objects in a 2D area and efficiently search for them by position and distance, assuming the objects are somewhat uniformly distributed.
+
+Object positions can be updated efficiently.
+
+If objects are positioned outside the grid area, they will be kept in the nearest edge cells. Try to avoid placing objects outside the grid area to avoid performance problems when searching near the edge of the grid.
+
+```csharp
+// Store MyObject instances in a 10x10 grid that covers the area from
+// (-100, -100) to (100, 100) 
+var grid = new SpatialGrid2D<MyObject>(10, new Rec2(-100, -100, 200, 200));
+
+// Add objects at specific positions
+var myObj = new MyObject();
+grid.Add(myObj, new Vector2(0, 0));
+grid.Add(new MyObject(), new Vector2(25f, 25f));
+
+// Update the position of an object
+grid.Move(myObj, new Vector2(50f, 50f));
+
+// Find the nearest object to a position within a distance
+var nearest = grid.FindNearest(new Vector2(0, 0), 100f);
+
+if (nearest is { } nearestObj) {
+  GD.Print($"Found nearest object: {nearestObj}");
+} else {
+  GD.Print("No object found within distance.");
+}
+
+// Find all objects within a distance from a position
+var objectsWithin = new List<MyObject>();
+grid.FindWithin(new Vector2(0, 0), 100f, objectsWithin);
+
+foreach (var obj in objectsWithin) {
+  GD.Print($"Found object within distance: {obj}");
+}
+
+// Check if an object is in the grid
+if (grid.Contains(myObj)) {
+  GD.Print("Grid contains the object.");
+} else {
+  GD.Print("Grid does not contain the object.");
+}
+
+// Remove an object
+grid.Remove(myObj);
+
+// Clear the grid
+grid.Clear();
 ```
 
 ---
