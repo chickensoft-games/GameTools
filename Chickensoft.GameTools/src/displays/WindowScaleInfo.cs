@@ -56,7 +56,8 @@ public record WindowScaleInfo(
   Vector2I ProjectViewportSize,
   Vector2I ProjectWindowSize,
   Vector2I NativeResolution,
-  Vector2I LogicalResolution
+  Vector2I LogicalResolution,
+  Vector2I ScreenPosition
 )
 {
   /// <inheritdoc />
@@ -72,5 +73,6 @@ public record WindowScaleInfo(
   {nameof(ProjectWindowSize)}: {ProjectWindowSize}
   {nameof(NativeResolution)}: {NativeResolution}
   {nameof(LogicalResolution)}: {LogicalResolution}
+  {nameof(ScreenPosition)}: {ScreenPosition}
   """;
 }
