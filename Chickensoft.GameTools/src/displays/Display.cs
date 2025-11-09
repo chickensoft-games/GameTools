@@ -53,6 +53,7 @@ public static class Display
   internal delegate float ScreenGetScaleDelegate(int screen);
   internal delegate Vector2I ScreenGetSizeDelegate(int screen);
   internal delegate int ScreenGetDpiDelegate(int screen);
+  internal delegate Vector2I ScreenGetPositionDelegate(int screen);
 
   internal delegate float GetDisplayScaleFactorDelegate(Window window);
   internal delegate Vector2I GetDisplayNativeResolutionDelegate(Window window);
@@ -69,6 +70,10 @@ public static class Display
     DisplayServer.ScreenGetDpi;
   internal static ScreenGetDpiDelegate ScreenGetDpi { get; set; } =
     ScreenGetDpiDefault;
+  internal static ScreenGetPositionDelegate ScreenGetPositionDefault { get; } =
+    DisplayServer.ScreenGetPosition;
+  internal static ScreenGetPositionDelegate ScreenGetPosition { get; set; } =
+    ScreenGetPositionDefault;
 
   internal static GetDisplayScaleFactorDelegate
     GetDisplayScaleFactorDefault
@@ -232,7 +237,7 @@ public static class Display
     window.MaxSize = sizeInfo.MaxSize;
     window.CurrentScreen = screen;
 
-    window.Position = (scaleInfo.LogicalResolution - window.Size) / 2;
+    window.Position = ((scaleInfo.LogicalResolution - window.Size) / 2) + scaleInfo.ScreenPosition;
 
     // Required since the window sometimes ends up on another screen, possibly
     // due to virtual window coordinates.
@@ -389,6 +394,12 @@ public static class Display
     // scale, but this at least gives them a common frame of reference.
     var contentScaleFactor = themeScale * correctionFactor;
 
+    // This is the position of the screen in the virtual coordinate space.
+    //
+    // We use this to center the window on the screen, by offsetting the window
+    // position by the screen position.
+    var screenPosition = ScreenGetPosition(screen);
+
     return new WindowScaleInfo(
       Screen: screen,
       SystemScale: systemScale,
@@ -400,7 +411,8 @@ public static class Display
       ProjectViewportSize: ProjectViewportSize,
       ProjectWindowSize: ProjectWindowSize,
       NativeResolution: nativeResolution,
-      LogicalResolution: godotResolution
+      LogicalResolution: godotResolution,
+      ScreenPosition: screenPosition
     );
   }
 

@@ -21,7 +21,8 @@ public class WindowScaleInfoTest(Node testScene) : TestClass(testScene)
       ProjectViewportSize: new Vector2I(8, 9),
       ProjectWindowSize: new Vector2I(10, 11),
       NativeResolution: new Vector2I(12, 13),
-      LogicalResolution: new Vector2I(14, 15)
+      LogicalResolution: new Vector2I(14, 15),
+      ScreenPosition: new Vector2I(16, 17)
     );
 
     scaleInfo.ToString().ShouldBe("""
@@ -36,6 +37,7 @@ public class WindowScaleInfoTest(Node testScene) : TestClass(testScene)
     ProjectWindowSize: (10, 11)
     NativeResolution: (12, 13)
     LogicalResolution: (14, 15)
+    ScreenPosition: (16, 17)
     """, StringCompareShould.IgnoreLineEndings);
   }
 }
