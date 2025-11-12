@@ -109,7 +109,7 @@ For all possible values, check each enum type.
 
 ## 🖥️ Display Scaling & DPI Awareness
 
-GameTools can help you manage display scaling on desktop platforms by automatically guessing or computing the correct scale factor for the game window's screen. On macOS and Windows, it can determine the exact user-defined scale factor by leveraging [Chickensoft.Platform] to invoke the relevant system API's natively.
+GameTools can help you manage display scaling on desktop platforms by automatically guessing or computing the correct scale factor for the game window's screen. GameTools uses [Chickensoft.Platform] to invoke the relevant system API's natively to properly detect display scaling and native resolution on Windows, macOS, and Linux. Due to limitations with Wayland, Linux support is limited to the primary monitor.
 
 Check out the [demo project] which lets you select between both scaling behaviors and toggle fullscreen mode.
 
