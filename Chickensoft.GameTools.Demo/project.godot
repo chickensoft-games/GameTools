@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Chickensoft.GameTools.Demo"
 run/main_scene="res://src/Main.tscn"
-config/features=PackedStringArray("4.4", "C#", "Mobile")
+config/features=PackedStringArray("4.5", "C#", "Mobile")
 config/icon="res://icon.png"
 
 [display]
@@ -29,9 +29,9 @@ project/assembly_name="Chickensoft.GameTools.Demo"
 
 [gui]
 
-theme/default_theme_scale=2.0
 theme/default_font_multichannel_signed_distance_field=true
 theme/default_font_generate_mipmaps=true
+theme/default_theme_scale=2.0
 
 [input]
 

@@ -67,7 +67,7 @@ case "$(uname -s)" in
 
    Linux)
      echo 'Linux'
-     open coverage/report/index.htm
+     xdg-open coverage/report/index.htm
      ;;
 
    CYGWIN*|MINGW32*|MSYS*|MINGW*)

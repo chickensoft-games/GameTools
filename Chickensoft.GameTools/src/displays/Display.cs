@@ -1,5 +1,6 @@
 namespace Chickensoft.GameTools.Displays;
 
+using System;
 using Chickensoft.GameTools.Environment;
 using Chickensoft.Platform;
 using Godot;
@@ -235,9 +236,18 @@ public static class Display
     window.Size = sizeInfo.Size;
     window.MinSize = sizeInfo.MinSize;
     window.MaxSize = sizeInfo.MaxSize;
+
+    // TODO(jolexxa): wayland screen position?
+    // setting window screen and position won't work on Wayland, and
+    // is a known issue that Godot can't even support as of 4.5.1:
+    // https://github.com/godotengine/godot/blob/e47fb8b8989fd5589c65c4b0ac980de2e936c041/platform/linuxbsd/wayland/display_server_wayland.cpp#L1088-L1090
+    //
+    // On a wayland multi-monitor setup today, the window is adjusted for the
+    // primary display and shown there -- not so bad. At least on my pc
     window.CurrentScreen = screen;
 
-    window.Position = ((scaleInfo.LogicalResolution - window.Size) / 2) + scaleInfo.ScreenPosition;
+    window.Position = ((scaleInfo.LogicalResolution - window.Size) / 2) +
+      scaleInfo.ScreenPosition;
 
     // Required since the window sometimes ends up on another screen, possibly
     // due to virtual window coordinates.
@@ -355,7 +365,8 @@ public static class Display
 
     // Use Win32 or CoreGraphics to get the display's actual resolution.
     var nativeResolution = GetDisplayNativeResolution(window);
-    // Use Win32 or CoreGraphics to determine the display's actual scale factor.
+    // Use Win32, CoreGraphics, or linux drm to determine the display's actual
+    // scale factor.
     var displayScale = GetDisplayScaleFactor(window);
     // Godot reports Windows' system scale factor, which may be different from
     // the monitor's scale factor since Godot does not opt-in to per-monitor DPI
@@ -364,22 +375,47 @@ public static class Display
     // Windows scale factor can be determined by dividing by 96.
     var systemScale = systemDpi / 96.0f;
     // Get the size of the window from Godot, which is going to be in the
-    // system scale factor coordinate space.
+    // logical resolution coordinate space.`
     var godotResolution = ScreenGetSize(window.CurrentScreen);
     var godotScale = ScreenGetScale(screen);
     // We need a ratio to correct from system scale to actual monitor scale
-    var correctionFactor = 1f / (
-      Features.OperatingSystem == OSFamily.macOS
-        ? (float)nativeResolution.Y / godotResolution.Y // macos
-        : displayScale / systemScale             // windows & linux
-    );
+    var correctionFactor = 1f / Features.OperatingSystem switch
+    {
+      // on macOS and linux, we can simply use the ratio between the native
+      // resolution and Godot's reported resolution to determine how much
+      // Godot is off by (since Godot is reporting logical resolution).
+      OSFamily.macOS => (float)nativeResolution.Y / godotResolution.Y,
+      OSFamily.Linux => (float)nativeResolution.Y / godotResolution.Y,
+      // windows is much more special -- Godot is not per-monitor DPI aware yet.
+      OSFamily.Windows => displayScale / systemScale,
+
+      // TODO(jolexxa): Support iOS / Android (and FreeBSD someday?)
+      // don't make promises we can't keep -- users should implement this
+      // themselves on these platforms and hopefully contribute back
+      // to this and Chickensoft.Platform (if needed).
+      OSFamily.FreeBSD => throw new NotSupportedException(
+        "[Chickensoft.GameTools]: Display scaling for FreeBSD is not yet " +
+        "supported."
+      ),
+      OSFamily.iOS => throw new NotSupportedException(
+        "[Chickensoft.GameTools]: Display scaling for iOS is not yet supported."
+      ),
+      OSFamily.Android => throw new NotSupportedException(
+        "[Chickensoft.GameTools]: Display scaling for Android is not yet " +
+        "supported."
+      ),
+      _ => throw new NotSupportedException(
+        "[Chickensoft.GameTools]: Display scaling can't detect the OS."
+      )
+    };
 
     var themeScale = (float)nativeResolution.Y / themeResolution.Y;
 
     // This is the retina multiplier on macOS since the macos logical
     // backbuffer coordinate space is multiplied by this factor.
+    // TODO(jolexxa): This may need consideration on iOS too.
     //
-    // On windows, this is simply the theme's scale factor.
+    // For all the normal os's, this is simply the theme's scale factor.
     var windowScale = Features.OperatingSystem == OSFamily.macOS
       ? godotScale
       : themeScale;
@@ -394,7 +430,8 @@ public static class Display
     // scale, but this at least gives them a common frame of reference.
     var contentScaleFactor = themeScale * correctionFactor;
 
-    // This is the position of the screen in the virtual coordinate space.
+    // This is the position of the screen in the virtual desktop with all of
+    // the monitors considered.
     //
     // We use this to center the window on the screen, by offsetting the window
     // position by the screen position.
