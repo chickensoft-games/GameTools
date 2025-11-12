@@ -9,3 +9,4 @@ obj/
 .DS_Store
 *.DotSettings.user
 *.binlog
+*.old

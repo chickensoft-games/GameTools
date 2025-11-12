@@ -45,6 +45,8 @@ using Godot;
 /// Godot project. Provided for convenience.</param>
 /// <param name="ProjectWindowSize">The window size as configured in the
 /// Godot project. Provided for convenience.</param>
+/// <param name="ScreenPosition">Window screen position (top left corner) from
+/// the Godot DisplayServer.</param>
 public record WindowScaleInfo(
   int Screen,
   float SystemScale,
