@@ -409,7 +409,7 @@ public static class Display
       )
     };
 
-    var themeScale = (float)nativeResolution.Y / themeResolution.Y;
+    var themeScale = (float)nativeResolution.X / themeResolution.X;
 
     // This is the retina multiplier on macOS since the macos logical
     // backbuffer coordinate space is multiplied by this factor.
