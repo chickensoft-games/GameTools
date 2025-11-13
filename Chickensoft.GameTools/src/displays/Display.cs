@@ -224,7 +224,7 @@ public static class Display
         }
         else
         {
-          window.ContentScaleSize = scaleInfo.LogicalResolution;
+          window.ContentScaleSize = new Vector2I(Mathf.FloorToInt(scaleInfo.LogicalResolution.Y * scaleInfo.ProjectWindowSize.Aspect()), scaleInfo.LogicalResolution.Y);
           window.ContentScaleMode = Window.ContentScaleModeEnum.CanvasItems;
           window.ContentScaleAspect = Window.ContentScaleAspectEnum.Expand;
         }
@@ -409,7 +409,7 @@ public static class Display
       )
     };
 
-    var themeScale = (float)nativeResolution.X / themeResolution.X;
+    var themeScale = (float)nativeResolution.Y / themeResolution.Y;
 
     // This is the retina multiplier on macOS since the macos logical
     // backbuffer coordinate space is multiplied by this factor.
