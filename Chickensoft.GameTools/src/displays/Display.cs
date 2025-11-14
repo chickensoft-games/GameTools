@@ -224,7 +224,14 @@ public static class Display
         }
         else
         {
-          window.ContentScaleSize = scaleInfo.LogicalResolution;
+          // We calculate the content scale size using the logical resolution
+          // and the project window size aspect ratio.
+          // The content scale size will be the same aspect ratio as the project window size,
+          // regardless of the logical resolution's aspect ratio.
+          window.ContentScaleSize = new Vector2I(
+              Mathf.FloorToInt(scaleInfo.LogicalResolution.Y * ProjectWindowSize.Aspect()),
+              scaleInfo.LogicalResolution.Y
+            );
           window.ContentScaleMode = Window.ContentScaleModeEnum.CanvasItems;
           window.ContentScaleAspect = Window.ContentScaleAspectEnum.Expand;
         }
