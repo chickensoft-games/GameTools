@@ -224,19 +224,14 @@ public static class Display
         }
         else
         {
-          // This is a hack to convert the logical resolution to the content scale size
-          // for use with non-16:9 aspect ratios.
-          // We convert the logical resolution to the content scale size based on the project window size aspect ratio.
-          var isLandscape = scaleInfo.LogicalResolution.X > scaleInfo.LogicalResolution.Y;
-          if (isLandscape)
-          {
-            window.ContentScaleSize = new Vector2I(Mathf.FloorToInt(scaleInfo.LogicalResolution.Y * ProjectWindowSize.Aspect()), scaleInfo.LogicalResolution.Y);
-          }
-          else
-          {
-            window.ContentScaleSize = new Vector2I(scaleInfo.LogicalResolution.X, Mathf.FloorToInt(scaleInfo.LogicalResolution.X / ProjectWindowSize.Aspect()));
-          }
-
+          // We calculate the content scale size using the logical resolution
+          // and the project window size aspect ratio.
+          // The content scale size will be the same aspect ratio as the project window size,
+          // regardless of the logical resolution's aspect ratio.
+          window.ContentScaleSize = new Vector2I(
+              Mathf.FloorToInt(scaleInfo.LogicalResolution.Y * ProjectWindowSize.Aspect()),
+              scaleInfo.LogicalResolution.Y
+            );
           window.ContentScaleMode = Window.ContentScaleModeEnum.CanvasItems;
           window.ContentScaleAspect = Window.ContentScaleAspectEnum.Expand;
         }
