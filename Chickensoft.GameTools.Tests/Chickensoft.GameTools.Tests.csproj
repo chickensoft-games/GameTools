@@ -6,7 +6,7 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <LangVersion>preview</LangVersion>
     <RootNamespace>Chickensoft.GameTools.Tests</RootNamespace>
-    <DebugType>full</DebugType>
+    <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
 
     <!-- Required for some nuget packages to work -->
