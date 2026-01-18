@@ -107,6 +107,45 @@ Features.Reset();
 
 For all possible values, check each enum type.
 
+## 🌴 Node Extensions
+
+Godot provides access to a node's children via the `GetChild()` and `GetChildren()` methods. However, the former requires index-based iteration and that you know the child's type, while the latter requires an `Array` allocation. GameTools provides extension methods allowing you to enumerate the children with zero allocations, either as `Node`s or restricting to children of a particular type:
+
+```csharp
+foreach (var child in node.GetChildEnumerable())
+{
+  // will loop over all children of "node"
+}
+
+foreach (var child2D in node.GetChildEnumerable<Node2D>())
+{
+  // will loop over all Node2D children of "node"
+}
+```
+
+Likewise, there are extension methods to enumerate all ancestors, or ancestors of a particular type:
+
+```csharp
+foreach (var ancestor in node.GetAncestorEnumerable())
+{
+  // will loop over all ancestors of "node"
+}
+
+foreach (var ancestor in node.GetAncestorEnumerable<MyNodeType>())
+{
+  // will loop over all MyNodeType ancestors of "node"
+}
+```
+
+Being able to enumerate ancestors of a particular type can be helpful, e.g., for finding the relevant ancestor node of a collider:
+
+```csharp
+if (collider.FindAncestor<MyCollidingType>(out var collidingEntity))
+{
+  // do something involving the colliding entity
+}
+```
+
 ## 🖥️ Display Scaling & DPI Awareness
 
 GameTools can help you manage display scaling on desktop platforms by automatically guessing or computing the correct scale factor for the game window's screen. GameTools uses [Chickensoft.Platform] to invoke the relevant system API's natively to properly detect display scaling and native resolution on Windows, macOS, and Linux. Due to limitations with Wayland, Linux support is limited to the primary monitor.
