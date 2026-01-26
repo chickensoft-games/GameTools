@@ -45,7 +45,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="SauceControl.InheritDoc" Version="2.0.2" PrivateAssets="all" />
-    <PackageReference Include="GodotSharp" Version="4.5.1" />
+    <PackageReference Include="GodotSharp" Version="4.6.0" />
     <PackageReference Include="Chickensoft.Platform" Version="1.4.0" />
   </ItemGroup>
 </Project>
