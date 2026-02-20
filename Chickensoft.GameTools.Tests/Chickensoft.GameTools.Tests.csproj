@@ -1,4 +1,4 @@
-<Project Sdk="Godot.NET.Sdk">
+<Project Sdk="Godot.NET.Sdk/4.5.1">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
@@ -6,7 +6,7 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <LangVersion>preview</LangVersion>
     <RootNamespace>Chickensoft.GameTools.Tests</RootNamespace>
-    <DebugType>full</DebugType>
+    <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
 
     <!-- Required for some nuget packages to work -->
