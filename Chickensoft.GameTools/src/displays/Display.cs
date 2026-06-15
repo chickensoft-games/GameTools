@@ -235,11 +235,11 @@ public static class Display
           window.ContentScaleMode = Window.ContentScaleModeEnum.CanvasItems;
           window.ContentScaleAspect = Window.ContentScaleAspectEnum.Expand;
         }
+        window.ContentScaleFactor = scaleInfo.ContentScaleFactor;
 
         break;
     }
 
-    window.ContentScaleFactor = scaleInfo.ContentScaleFactor;
     window.Size = sizeInfo.Size;
     window.MinSize = sizeInfo.MinSize;
     window.MaxSize = sizeInfo.MaxSize;
